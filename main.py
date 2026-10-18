@@ -227,5 +227,6 @@ async def close(ctx):
 # ================= ================= =================
 # 🔑 تشغيل البوت
 # ================= ================= =================
-TOKEN = "MTU2MDg1Njc5MzMzOTUzNTQwMw.GaHur1.gPtMqZO5GO_cF0NB86pUoYGNJP-4ttxpRxYerM"
-bot.run(TOKEN)
+import os
+
+bot.run(os.environ.get("TOKEN"))
