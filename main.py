@@ -149,6 +149,81 @@ async def guess(ctx):
     except Exception:
         await ctx.send(f"⏱️ انتهى الوقت! الرقم الصحيح كان **{secret_number}**.")
 
+import os
+import discord
+from discord.ext import commands
+
+# إعدادات البوت
+intents = discord.Intents.default()
+intents.message_content = True
+bot = commands.Bot(command_prefix="-", intents=intents)
+
+
+@bot.event
+async def on_ready():
+  print(f"تم تسجيل الدخول بنجاح كـ {bot.user}")
+
+
+# أمر الألعاب
+@bot.command(name="العاب")
+async def games_list(ctx):
+  embed = discord.Embed(
+      title="🎮 قائمة الألعاب المتاحة",
+      description="إليك قائمة بأفضل الألعاب الجماعية والفردية المقترحة!",
+      color=discord.Color.blue(),
+  )
+
+  # قائمة الألعاب الجماعية (10 ألعاب)
+  multiplayer_games = (
+      "1. Among Us 🚀\n"
+      "2. Valorant 🎯\n"
+      "3. Rocket League 🚗\n"
+      "4. Overcooked! 2 👨‍🍳\n"
+      "5. Roblox 🧱\n"
+      "6. Lethal Company 📦\n"
+      "7. Fall Guys 👑\n"
+      "8. Apex Legends 🔫\n"
+      "9. Minecraft (Multiplayer) ⛏️\n"
+      "10. Dead by Daylight 🔪"
+  )
+
+  # قائمة الألعاب الفردية (10 ألعاب)
+  singleplayer_games = (
+      "1. Elden Ring ⚔️\n"
+      "2. Hollow Knight 🗡️\n"
+      "3. God of War 🪓\n"
+      "4. The Witcher 3 🐺\n"
+      "5. Red Dead Redemption 2 🤠\n"
+      "6. Cyberpunk 2077 🏙️\n"
+      "7. Stardew Valley 🌾\n"
+      "8. Celeste 🏔️\n"
+      "9. Ghost of Tsushima 🌸\n"
+      "10. Resident Evil 4 Remake 🧟"
+  )
+
+  # إضافة الأقسام إلى الـ Embed
+  embed.add_field(
+      name="👥 ألعاب جماعية (لازم معك ناس):",
+      value=multiplayer_games,
+      inline=False,
+  )
+  embed.add_field(
+      name="👤 ألعاب فردية (تلعبها لحالك):",
+      value=singleplayer_games,
+      inline=False,
+  )
+
+  embed.set_footer(
+      text=f"طلب بواسطة: {ctx.author.display_name}",
+      icon_url=ctx.author.display_avatar.url,
+  )
+
+  await ctx.send(embed=embed)
+
+
+# تشغيل البوت باستخدام المتغير المحفوظ في Render
+bot.run(os.environ.get("TOKEN"))
+
 
 # ================= ================= =================
 # 4️⃣ نظام التذاكر والتواضل (Ticket System)
