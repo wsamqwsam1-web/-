@@ -103,127 +103,140 @@ async def level(ctx, member: discord.Member = None):
 # 3️⃣ نظام الألعاب (Mini-Games)
 # ================= ================= =================
 
-# 🎮 لعبة حجرة ورقة مقص
-@bot.command()
-async def rps(ctx, choice: str = None):
-    options = ["حجرة", "ورقة", "مقص"]
-    if not choice or choice not in options:
-        await ctx.send("❌ يرجى اختيار إحدى الخيارات التالية: `!rps حجرة` أو `!rps ورقة` أو `!rps مقص`")
-        return
-
-    bot_choice = random.choice(options)
-
-    if choice == bot_choice:
-        result = "🤝 تعادل!"
-    elif (choice == "حجرة" and bot_choice == "مقص") or \
-         (choice == "ورقة" and bot_choice == "حجرة") or \
-         (choice == "مقص" and bot_choice == "ورقة"):
-        result = "🎉 مبروك! أنت فزت علي!"
-    else:
-        result = "😈 أنا فزت عليك!"
-
-    embed = discord.Embed(title="🎮 لعبة حجرة ورقة مقص", color=discord.Color.purple())
-    embed.add_field(name="اختيارك:", value=choice, inline=True)
-    embed.add_field(name="اختيار البوت:", value=bot_choice, inline=True)
-    embed.add_field(name="النتيجة:", value=f"**{result}**", inline=False)
-
-    await ctx.send(embed=embed)
-
-
-# 🎲 لعبة تخمين الرقم
-@bot.command()
-async def guess(ctx):
-    secret_number = random.randint(1, 10)
-    await ctx.send("🎲 اخترت رقماً بين 1 و 10! حاول تخمينه بحساب كتابة الرقم خلال 15 ثانية:")
-
-    def check(m):
-        return m.author == ctx.author and m.channel == ctx.channel and m.content.isdigit()
-
-    try:
-        msg = await bot.wait_for('message', check=check, timeout=15.0)
-        guess_num = int(msg.content)
-        if guess_num == secret_number:
-            await ctx.send(f"🎯 كفووو! تخمينك صحيح الرقم كان **{secret_number}**!")
-        else:
-            await ctx.send(f"❌ للأسف تخمين خاطئ، الرقم الصحيح كان **{secret_number}**.")
-    except Exception:
-        await ctx.send(f"⏱️ انتهى الوقت! الرقم الصحيح كان **{secret_number}**.")
-
 import os
+import random
 import discord
 from discord.ext import commands
 
-# إعدادات البوت
 intents = discord.Intents.default()
 intents.message_content = True
-bot = commands.Bot(command_prefix="-", intents=intents)
 
+bot = commands.Bot(command_prefix='-', intents=intents)
 
 @bot.event
 async def on_ready():
-  print(f"تم تسجيل الدخول بنجاح كـ {bot.user}")
+    print(f'تم تسجيل الدخول بنجاح باسم: {bot.user}')
 
+# قائمة الألعاب الشاملة (المنيو)
+@bot.command(name='العاب')
+async def games_menu(ctx):
+    embed = discord.Embed(
+        title="🎮 ألعاب وفعاليات سند",
+        description="تحدّ البوت أو جرب الفعاليات مع أصحابك! اكتب الأمر الموضح للبدء:",
+        color=discord.Color.gold()
+    )
 
-# أمر الألعاب
-@bot.command(name="العاب")
-async def games_list(ctx):
-  embed = discord.Embed(
-      title="🎮 قائمة الألعاب المتاحة",
-      description="إليك قائمة بأفضل الألعاب الجماعية والفردية المقترحة!",
-      color=discord.Color.blue(),
-  )
+    games_list = (
+        "• `-روليت` : لعبة الروليت (العقاب أو التحدي) 🎰\n"
+        "• `-حجر` أو `-ورقة` أو `-مقص` : حجر ورقة مقص ✂️\n"
+        "• `-خمن` : لعبة تخمين الرقم من 1 إلى 10 🎯\n"
+        "• `-سؤال` : سؤال عشوائي للفعاليات ❓\n"
+        "• `-نسبة @عضو` : نسبة التوافق/الحب بينك وبين أي شخص 💘\n"
+        "• `-عملة` : رمي العملة (ملك أم كتابة) 🪙\n"
+        "• `-نرد` : رمي النرد 🎲"
+    )
 
-  # قائمة الألعاب الجماعية (10 ألعاب)
-  multiplayer_games = (
-      "1. Among Us 🚀\n"
-      "2. Valorant 🎯\n"
-      "3. Rocket League 🚗\n"
-      "4. Overcooked! 2 👨‍🍳\n"
-      "5. Roblox 🧱\n"
-      "6. Lethal Company 📦\n"
-      "7. Fall Guys 👑\n"
-      "8. Apex Legends 🔫\n"
-      "9. Minecraft (Multiplayer) ⛏️\n"
-      "10. Dead by Daylight 🔪"
-  )
+    embed.add_field(name="🎲 الألعاب والفعاليات المتاحة:", value=games_list, inline=False)
+    embed.set_footer(text="سند - خويك في الفعاليات 🚀")
 
-  # قائمة الألعاب الفردية (10 ألعاب)
-  singleplayer_games = (
-      "1. Elden Ring ⚔️\n"
-      "2. Hollow Knight 🗡️\n"
-      "3. God of War 🪓\n"
-      "4. The Witcher 3 🐺\n"
-      "5. Red Dead Redemption 2 🤠\n"
-      "6. Cyberpunk 2077 🏙️\n"
-      "7. Stardew Valley 🌾\n"
-      "8. Celeste 🏔️\n"
-      "9. Ghost of Tsushima 🌸\n"
-      "10. Resident Evil 4 Remake 🧟"
-  )
+    await ctx.send(embed=embed)
 
-  # إضافة الأقسام إلى الـ Embed
-  embed.add_field(
-      name="👥 ألعاب جماعية (لازم معك ناس):",
-      value=multiplayer_games,
-      inline=False,
-  )
-  embed.add_field(
-      name="👤 ألعاب فردية (تلعبها لحالك):",
-      value=singleplayer_games,
-      inline=False,
-  )
+# 1. لعبة الروليت (Roulette)
+@bot.command(name='روليت')
+async def roulette(ctx):
+    outcomes = [
+        "💥 **بوووم!** طاحت الرصاصة عليك وحدك الخسران! (اختر عقاب لنفسك 😈)",
+        "🛡️ **نجوت!** المسدس كان فاضي، دور الشخص اللي بعدك.",
+        "✨ **حظك قوي!** نجوت وشردت من العقاب.",
+        "💀 **طلقتين مو واحدة!** اختر عقابين أو نفذ طلب للشباب في السيرفر."
+    ]
+    res = random.choice(outcomes)
+    await ctx.send(f"🎰 **تلف الروليت...**\n{res}")
 
-  embed.set_footer(
-      text=f"طلب بواسطة: {ctx.author.display_name}",
-      icon_url=ctx.author.display_avatar.url,
-  )
+# 2. لعبة حجر ورقة مقص
+@bot.command(name='حجر')
+async def rps_rock(ctx):
+    await play_rps(ctx, 'حجر')
 
-  await ctx.send(embed=embed)
+@bot.command(name='ورقة')
+async def rps_paper(ctx):
+    await play_rps(ctx, 'ورقة')
 
+@bot.command(name='مقص')
+async def rps_scissors(ctx):
+    await play_rps(ctx, 'مقص')
 
-# تشغيل البوت باستخدام المتغير المحفوظ في Render
+async def play_rps(ctx, user_choice):
+    options = ['حجر', 'ورقة', 'مقص']
+    bot_choice = random.choice(options)
+    
+    if user_choice == bot_choice:
+        result = f"🤝 **تعادل!** كلينا اخترنا `{bot_choice}`"
+    elif (user_choice == 'حجر' and bot_choice == 'مقص') or \
+         (user_choice == 'ورقة' and bot_choice == 'حجر') or \
+         (user_choice == 'مقص' and bot_choice == 'ورقة'):
+        result = f"🎉 **كفووو فزت علي!** أنت اخترت `{user_choice}` وأنا اخترت `{bot_choice}`"
+    else:
+        result = f"😈 **هاردلك أنا فزت عليك!** أنت اخترت `{user_choice}` وأنا اخترت `{bot_choice}`"
+
+    await ctx.send(result)
+
+# 3. لعبة تخمين الرقم
+@bot.command(name='خمن')
+async def guess_number(ctx):
+    secret_num = random.randint(1, 10)
+    await ctx.send("🎯 **تحدي التخمين!** فكرت في رقم من **1 إلى 10**.\nجرب تخمن واكتب: `-رقم [رقمك]` (مثال: `-رقم 5`)")
+    bot.secret_number = secret_num
+
+@bot.command(name='رقم')
+async def check_guess(ctx, number: int):
+    if not hasattr(bot, 'secret_number'):
+        await ctx.send("❌ اكتب `-خمن` أولاً لتبدأ اللعبة!")
+        return
+
+    if number == bot.secret_number:
+        await ctx.send(f"🎯 **صح عليك بطل!** الرقم الصحيح كان `{bot.secret_number}`")
+        del bot.secret_number
+    elif number < bot.secret_number:
+        await ctx.send("⬆️ الرقم أكبر من كذا! حاول مرة ثانية.")
+    else:
+        await ctx.send("⬇️ الرقم أصغر من كذا! حاول مرة ثانية.")
+
+# 4. أسئلة فعاليات
+@bot.command(name='سؤال')
+async def ask_question(ctx):
+    questions = [
+        "لو يعطونك مليون دولار وترترك ألعاب الفيديو لمدة سنة، توافق؟",
+        "وش أكثر لعبة ندّمت إنك اشتريتها؟",
+        "لو تقدر تعيش داخل عالم لعبة واحدة، وش تختار؟",
+        "مين أكثر شخص تحب تلعب معاه في السيرفر؟",
+        "وش أول لعبة تختيم ختمتها في حياتك؟"
+    ]
+    q = random.choice(questions)
+    await ctx.send(f"❓ **سؤال الفعالية:** {q}")
+
+# 5. نسبة التوافق / الحب
+@bot.command(name='نسبة')
+async def love_percentage(ctx, member: discord.Member = None):
+    if member is None:
+        await ctx.send("❌ يرجى منشن الشخص! مثال: `-نسبة @اسم_العضو`")
+        return
+    
+    percentage = random.randint(0, 100)
+    await ctx.send(f"💘 نسبة التوافق بين **{ctx.author.display_name}** و **{member.display_name}** هي: **{percentage}%**!")
+
+# 6. رمي العملة والنرد
+@bot.command(name='عملة')
+async def flip_coin(ctx):
+    res = random.choice(['ملك 👑', 'كتابة 📝'])
+    await ctx.send(f"🪙 النتيجة هي: **{res}**")
+
+@bot.command(name='نرد')
+async def roll_dice(ctx):
+    num = random.randint(1, 6)
+    await ctx.send(f"🎲 طلع لك الرقم: **{num}**")
+
 bot.run(os.environ.get("TOKEN"))
-
 
 # ================= ================= =================
 # 4️⃣ نظام التذاكر والتواضل (Ticket System)
